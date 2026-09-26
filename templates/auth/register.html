@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Register - StockSense{% endblock %}
+{% block content %}
+<div style="max-width: 440px; margin: 40px auto;">
+    <div class="card" style="padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="color: var(--primary); font-size: 1.6rem;">Create Account</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">Join StockSense inventory management</p>
+        </div>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            {% for field in form %}
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #991b1b; font-size: 0.8rem; margin-top: 4px;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Register Account</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 0.85rem;">
+            Already have an account? <a href="{% url 'login' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Log in</a>
+        </div>
+    </div>
+</div>
+<style>
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
+    .form-input:focus { outline: none; border-color: var(--primary); }
+</style>
+{% endblock %}

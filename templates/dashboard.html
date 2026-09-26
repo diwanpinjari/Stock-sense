@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - StockSense{% endblock %}
+{% block page_heading %}Executive Inventory Overview{% endblock %}
+
+{% block content %}
+<style>
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 28px; }
+    .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .kpi-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .kpi-val { font-size: 1.8rem; font-weight: 800; color: var(--text-dark); }
+    .kpi-card.alert-card { border-left: 5px solid var(--accent-red); }
+    .kpi-card.success-card { border-left: 5px solid var(--accent-green); }
+    .kpi-card.info-card { border-left: 5px solid var(--primary); }
+    .split-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+</style>
+
+<div class="kpi-grid">
+    <div class="kpi-card info-card">
+        <div class="kpi-label">Total Catalog Items</div>
+        <div class="kpi-val">{{ total_products }}</div>
+    </div>
+    <div class="kpi-card success-card">
+        <div class="kpi-label">Total Physical Units</div>
+        <div class="kpi-val">{{ total_inventory_items|floatformat:0 }}</div>
+    </div>
+    <div class="kpi-card alert-card">
+        <div class="kpi-label">Low / Out of Stock</div>
+        <div class="kpi-val" style="color: var(--accent-red);">{{ low_stock_count }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Pending Receipts</div>
+        <div class="kpi-val">{{ pending_receipts }}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-label">Pending Deliveries</div>
+        <div class="kpi-val">{{ pending_deliveries }}</div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 28px; background: #faf7f9; border-color: #ebdce8;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="color: var(--primary); margin-bottom: 4px;">Quick Operations</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Direct action shortcuts for day-to-day warehouse operations</p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <a href="{% url 'receipt_create' %}" class="btn btn-primary">+ New Vendor Receipt</a>
+            <a href="{% url 'delivery_create' %}" class="btn btn-outline" style="background:#fff;">+ New Delivery Order</a>
+        </div>
+    </div>
+</div>
+
+<div class="split-layout">
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); font-weight: 700;">
+            📜 Recent Stock Ledger Transactions (Audit Log)
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Product</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_ledger %}
+                <tr>
+                    <td style="color: var(--text-muted); font-size: 0.82rem;">{{ log.timestamp|date:"M d, H:i" }}</td>
+                    <td><strong>{{ log.product.name }}</strong></td>
+                    <td>{{ log.source_location }}</td>
+                    <td>{{ log.destination_location }}</td>
+                    <td><span class="badge badge-done">+{{ log.quantity }} {{ log.product.uom }}</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No ledger entries recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--accent-red);">
+            ⚠️ Low Stock Alert (Reorder Trigger)
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Available</th>
+                    <th>Min Rule</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_list %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td style="color: var(--accent-red); font-weight: 700;">{{ item.available }} {{ item.product.uom }}</td>
+                    <td style="color: var(--text-muted);">{{ item.reorder_level }} {{ item.product.uom }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--accent-green); padding: 24px; font-weight: 600;">
+                        ✓ All stock levels optimal
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

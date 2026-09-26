@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockSense - Double-Entry Inventory Management System</title>
+    <style>
+        :root {
+            --primary: #714B67;
+            --primary-dark: #53334b;
+            --primary-light: #fbf5fa;
+            --secondary: #017E84;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+            --accent-green: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+        
+        nav { background: #ffffff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; }
+        .brand { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; align-items: center; gap: 20px; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.95rem; }
+        .nav-links a:hover { color: var(--primary); }
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 22px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; }
+        .btn-primary { background: var(--primary); color: #ffffff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-dark); }
+        .btn-outline:hover { background: #f1f5f9; }
+        
+        .hero { max-width: 1200px; margin: 0 auto; padding: 80px 24px 60px; text-align: center; }
+        .badge-pill { display: inline-block; padding: 6px 14px; background: var(--primary-light); color: var(--primary); border: 1px solid #ebdce8; border-radius: 9999px; font-size: 0.82rem; font-weight: 700; margin-bottom: 24px; text-transform: uppercase; }
+        .hero h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.15; color: var(--text-dark); max-width: 900px; margin: 0 auto 20px; }
+        .hero h1 span { color: var(--primary); }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 680px; margin: 0 auto 36px; }
+        .hero-actions { display: flex; justify-content: center; gap: 16px; margin-bottom: 48px; }
+        
+        .tech-banner { max-width: 900px; margin: 0 auto 70px; background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 20px 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: left; }
+        .tech-item h4 { font-size: 0.95rem; color: var(--text-dark); font-weight: 700; margin-bottom: 4px; }
+        .tech-item p { font-size: 0.82rem; color: var(--text-muted); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto 80px; padding: 0 24px; }
+        .card { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+        .card-icon { width: 44px; height: 44px; border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 18px; }
+        .card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+        .card p { font-size: 0.92rem; color: var(--text-muted); }
+        
+        footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem; background: #ffffff; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'index' %}" class="brand">📦 StockSense</a>
+            <ul class="nav-links">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}" class="btn btn-primary">Open Dashboard →</a></li>
+                    <li><a href="{% url 'logout' %}" class="btn btn-outline">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="btn btn-outline">Sign In</a></li>
+                    <li><a href="{% url 'register' %}" class="btn btn-primary">Register Account</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge-pill">Odoo Hackathon 2026 Edition</div>
+        <h1>Modular Inventory Management with <span>Double-Entry Ledger</span></h1>
+        <p>
+            High-integrity inventory engine built with Django and dynamic SQLite. Full ledger audits, negative stock prevention, and zero cloud lock-in.
+        </p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary" style="font-size: 1.05rem; padding: 12px 28px;">Enter Dashboard →</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary" style="font-size: 1.05rem; padding: 12px 28px;">Create Account</a>
+                <a href="{% url 'login' %}" class="btn btn-outline" style="font-size: 1.05rem; padding: 12px 28px;">Sign In</a>
+            {% endif %}
+        </div>
+
+        <div class="tech-banner">
+            <div class="tech-item">
+                <h4>Double-Entry Ledger</h4>
+                <p>Immutable debit/credit tracking for all stock moves.</p>
+            </div>
+            <div class="tech-item">
+                <h4>Zero Negative Stock</h4>
+                <p>Atomic validations guard source locations before posting.</p>
+            </div>
+            <div class="tech-item">
+                <h4>Console OTP Auth</h4>
+                <p>Terminal-dispatched tokens for rapid verification.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-icon">📥</div>
+            <h3>Vendor Receipts</h3>
+            <p>Log incoming shipments from suppliers, verify item quantities, and automatically increase stock balances in storage bins.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📤</div>
+            <h3>Customer Deliveries</h3>
+            <p>Pick and pack outgoing orders with live availability checks to protect against negative physical stock.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🔄</div>
+            <h3>Internal Transfers</h3>
+            <p>Move materials between warehouse racks and zones with complete visibility and audit traceability.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>StockSense © 2026. Built with Django & SQLite.</p>
+    </footer>
+</body>
+</html>

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Category(models.Model):
@@ -151,3 +153,26 @@ class StockLedger(models.Model):
 
     def __str__(self):
         return f"{self.timestamp.strftime('%Y-%m-%d %H:%M')} | {self.product.sku}: {self.quantity} from {self.source_location} to {self.destination_location}"
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('manager', 'Warehouse Manager (Full System & Approvals)'),
+        ('operator', 'Warehouse Operator (Receipts & Shipments)'),
+        ('auditor', 'Stock Auditor (Ledger Audits & Discrepancies)'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='operator')
+
+    # Explicit manager declaration stops VS Code / Pylance "no objects member" warning
+    objects = models.Manager()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_role_display()}"
+
+
+@receiver(post_save, sender=User)
+def create_or_save_user_profile(sender, instance, created, **kwargs):
+    """Automatically ensure a profile exists when any User is saved."""
+    if created:
+        role = 'manager' if instance.is_superuser else 'operator'
+        UserProfile.objects.get_or_create(user=instance, defaults={'role': role})

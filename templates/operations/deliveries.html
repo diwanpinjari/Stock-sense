@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Delivery Orders - StockSense{% endblock %}
+{% block page_heading %}Customer Delivery Orders (Outgoing){% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Manage and ship goods to customers. Stock sufficiency is checked before confirmation.
+    </p>
+    <a href="{% url 'delivery_create' %}" class="btn btn-primary">+ Create Delivery Order</a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table>
+        <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Source (Storage)</th>
+                <th>Destination (Customer)</th>
+                <th>Items & Quantity</th>
+                <th>Scheduled Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in deliveries %}
+            <tr>
+                <td><strong>{{ d.reference }}</strong></td>
+                <td>{{ d.source_location }}</td>
+                <td>{{ d.destination_location }}</td>
+                <td>
+                    {% for line in d.lines.all %}
+                        <div>{{ line.product.name }} (<strong>{{ line.quantity }} {{ line.product.uom }}</strong>)</div>
+                    {% empty %}
+                        <span style="color: var(--text-muted);">No items</span>
+                    {% endfor %}
+                </td>
+                <td>{{ d.scheduled_date|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <span class="badge badge-{{ d.status }}">{{ d.status }}</span>
+                </td>
+                <td>
+                    {% if d.status != 'done' and d.status != 'canceled' %}
+                        <form method="POST" action="{% url 'delivery_validate' d.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" style="padding: 6px 12px; font-size: 0.8rem;">
+                                Validate (Ship Goods)
+                            </button>
+                        </form>
+                    {% else %}
+                        <span style="color: var(--status-done); font-weight: 600; font-size: 0.85rem;">✓ Dispatched</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                    No delivery orders found. Click <strong>+ Create Delivery Order</strong> to prepare a shipment.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

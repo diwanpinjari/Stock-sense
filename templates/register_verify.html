@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Verify Activation Code - StockSense{% endblock %}
+{% block content %}
+<div style="max-width: 440px; margin: 40px auto;">
+    <div class="card" style="padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="color: var(--primary); font-size: 1.6rem;">Verify Your Account</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+                Hi <strong>{{ username }}</strong> — an activation code was printed to the
+                server terminal for your <strong>{{ role_name }}</strong> account.
+                Enter it below to finish registering.
+            </p>
+        </div>
+
+        <form method="POST" novalidate class="verify-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 16px;">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #991b1b; font-size: 0.8rem; margin-top: 4px;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Verify Account</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 0.85rem;">
+            Didn't get a code?
+            <a href="{% url 'register_resend_otp' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Resend OTP</a>
+        </div>
+    </div>
+</div>
+<style>
+    .verify-form input[type="text"],
+    .verify-form input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+    .verify-form input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+</style>
+{% endblock %}
