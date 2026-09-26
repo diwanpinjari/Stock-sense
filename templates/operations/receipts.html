@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Incoming Receipts - StockSense{% endblock %}
+{% block page_heading %}Incoming Goods Receipts (Vendors){% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Track and confirm items arriving from external vendors into company locations.
+    </p>
+    <a href="{% url 'receipt_create' %}" class="btn btn-primary">+ Create New Receipt</a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table>
+        <thead>
+            <tr>
+                <th>Reference</th>
+                <th>Source (Vendor)</th>
+                <th>Destination</th>
+                <th>Items & Quantity</th>
+                <th>Scheduled Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in receipts %}
+            <tr>
+                <td><strong>{{ r.reference }}</strong></td>
+                <td>{{ r.source_location }}</td>
+                <td>{{ r.destination_location }}</td>
+                <td>
+                    {% for line in r.lines.all %}
+                        <div>{{ line.product.name }} (<strong>{{ line.quantity }} {{ line.product.uom }}</strong>)</div>
+                    {% empty %}
+                        <span style="color: var(--text-muted);">No items</span>
+                    {% endfor %}
+                </td>
+                <td>{{ r.scheduled_date|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <span class="badge badge-{{ r.status }}">{{ r.status }}</span>
+                </td>
+                <td>
+                    {% if r.status != 'done' and r.status != 'canceled' %}
+                        <form method="POST" action="{% url 'receipt_validate' r.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" style="padding: 6px 12px; font-size: 0.8rem;">
+                                Validate (Receive)
+                            </button>
+                        </form>
+                    {% else %}
+                        <span style="color: var(--status-done); font-weight: 600; font-size: 0.85rem;">✓ Recorded</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                    No receipts found. Click <strong>+ Create New Receipt</strong> to record your first vendor shipment.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
