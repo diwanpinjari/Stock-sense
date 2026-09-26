@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}New Vendor Receipt - StockSense{% endblock %}
+{% block page_heading %}Create Vendor Receipt{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto;">
+    <div class="card">
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #9b1c1c; font-size: 0.8rem; margin-top: 5px;">
+                            {{ field.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div style="display: flex; gap: 12px; margin-top: 28px;">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                    Save Draft Receipt
+                </button>
+                <a href="{% url 'receipts_list' %}" class="btn" style="background: #f3f4f6; color: #374151;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        background-color: #fff;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+</style>
+{% endblock %}
