@@ -1,61 +1,303 @@
-{% extends 'base.html' %}
-{% block title %}Verify Activation Code - StockSense{% endblock %}
-{% block content %}
-<div style="max-width: 440px; margin: 40px auto;">
-    <div class="card" style="padding: 32px;">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <h2 style="color: var(--primary); font-size: 1.6rem;">Verify Your Account</h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
-                Hi <strong>{{ username }}</strong> — an activation code was printed to the
-                server terminal for your <strong>{{ role_name }}</strong> account.
-                Enter it below to finish registering.
-            </p>
-        </div>
+{% extends "base.html" %}
 
-        <form method="POST" novalidate class="verify-form">
-            {% csrf_token %}
+{% block title %}Verify Registration — StockSense{% endblock %}
 
-            {% if form.non_field_errors %}
-                <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 16px;">
-                    {% for error in form.non_field_errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% for field in form %}
-                <div style="margin-bottom: 18px;">
-                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div style="color: #991b1b; font-size: 0.8rem; margin-top: 4px;">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Verify Account</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 20px; font-size: 0.85rem;">
-            Didn't get a code?
-            <a href="{% url 'register_resend_otp' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Resend OTP</a>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
 <style>
-    .verify-form input[type="text"],
-    .verify-form input[type="number"] {
+    .auth-page {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 20px;
+    }
+
+    .auth-wrapper {
         width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 0.95rem;
-        letter-spacing: 2px;
+        max-width: 480px;
+    }
+
+    .auth-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        padding: 38px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .verification-icon {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 22px;
+        border-radius: 18px;
+        background: #ecfdf5;
+        color: #059669;
+        font-size: 28px;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .auth-header h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 28px;
+        letter-spacing: -0.7px;
+    }
+
+    .auth-header p {
+        margin: 10px 0 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .verification-note {
+        padding: 14px 16px;
+        margin-bottom: 22px;
+        border-radius: 12px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: #1e40af;
+        font-size: 13px;
+        line-height: 1.65;
         text-align: center;
     }
-    .verify-form input:focus {
+
+    .verification-note strong {
+        color: #1e3a8a;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group label {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 52px;
+        padding: 12px 16px;
+        border: 1px solid #dbe2ea;
+        border-radius: 11px;
         outline: none;
-        border-color: var(--primary);
+        background: #ffffff;
+        color: #111827;
+        font-size: 18px;
+        letter-spacing: 4px;
+        text-align: center;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .form-group input::placeholder {
+        color: #cbd5e1;
+        letter-spacing: 2px;
+    }
+
+    .form-group input:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-help {
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+
+    .auth-submit {
+        width: 100%;
+        min-height: 49px;
+        margin-top: 4px;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .terminal-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 22px;
+        padding: 13px 14px;
+        border-radius: 11px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .terminal-icon {
+        flex: 0 0 auto;
+        font-size: 14px;
+    }
+
+    .auth-footer {
+        margin-top: 23px;
+        padding-top: 22px;
+        border-top: 1px solid #eef2f7;
+        text-align: center;
+    }
+
+    .auth-footer a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 520px) {
+        .auth-page {
+            padding: 30px 15px;
+        }
+
+        .auth-card {
+            padding: 28px 22px;
+            border-radius: 18px;
+        }
+
+        .auth-header h1 {
+            font-size: 25px;
+        }
     }
 </style>
+{% endblock %}
+
+
+{% block public_content %}
+<div class="auth-page">
+
+    <div class="auth-wrapper">
+
+        <div class="auth-card">
+
+            <div class="verification-icon">
+                ✓
+            </div>
+
+
+            <div class="auth-header">
+                <h1>Verify your account</h1>
+
+                <p>
+                    Enter the verification code to complete your
+                    StockSense registration.
+                </p>
+            </div>
+
+
+            <div class="verification-note">
+                <strong>Verification code required</strong><br>
+                Enter the code generated by the StockSense registration
+                process.
+            </div>
+
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+
+                {% for field in form %}
+                    <div class="form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+
+                <button type="submit" class="btn btn-primary auth-submit">
+                    Verify Account
+                </button>
+            </form>
+
+
+            <div class="terminal-note">
+                <span class="terminal-icon">💻</span>
+
+                <span>
+                    If your project is configured to print verification
+                    codes to the development terminal, check the terminal
+                    where Django is running.
+                </span>
+            </div>
+
+
+            <div class="auth-footer">
+                <a href="{% url 'login' %}">
+                    ← Back to Sign In
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}

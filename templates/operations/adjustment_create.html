@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}New Receipt — StockSense{% endblock %}
+{% block title %}Stock Adjustment — StockSense{% endblock %}
 
 {% block page_heading %}
-Create Vendor Receipt
+Stock Adjustment
 {% endblock %}
 
 
@@ -11,7 +11,7 @@ Create Vendor Receipt
 
 <style>
     .form-page {
-        max-width: 850px;
+        max-width: 760px;
         margin: 0 auto;
     }
 
@@ -42,6 +42,25 @@ Create Vendor Receipt
 
     .form-body {
         padding: 28px;
+    }
+
+    .warning-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 15px 16px;
+        margin-bottom: 24px;
+        border-radius: 12px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .warning-icon {
+        flex: 0 0 auto;
+        font-size: 17px;
     }
 
     .form-grid {
@@ -126,17 +145,6 @@ Create Vendor Receipt
         border-top: 1px solid #eef2f7;
     }
 
-    .form-note {
-        padding: 13px 15px;
-        margin-bottom: 22px;
-        border-radius: 10px;
-        background: #eff6ff;
-        border: 1px solid #dbeafe;
-        color: #1e40af;
-        font-size: 12px;
-        line-height: 1.6;
-    }
-
     @media (max-width: 650px) {
         .form-grid {
             grid-template-columns: 1fr;
@@ -168,20 +176,32 @@ Create Vendor Receipt
     <div class="form-card">
 
         <div class="form-card-header">
-            <h2>New Vendor Receipt</h2>
+
+            <h2>
+                Adjust Inventory
+            </h2>
 
             <p>
-                Create a draft receipt for stock arriving from a vendor.
-                The inventory ledger is updated when the receipt is validated.
+                Align system stock with a physical inventory count.
             </p>
+
         </div>
 
 
         <div class="form-body">
 
-            <div class="form-note">
-                📦 This operation represents incoming inventory from an
-                external/vendor source into an internal location.
+            <div class="warning-box">
+
+                <span class="warning-icon">
+                    ⚠️
+                </span>
+
+                <span>
+                    Use an adjustment only when the physical quantity differs
+                    from the quantity currently recorded by StockSense.
+                    The adjustment is applied immediately after submission.
+                </span>
+
             </div>
 
 
@@ -235,14 +255,15 @@ Create Vendor Receipt
 
                 <div class="form-footer">
 
-                    <a href="{% url 'receipts_list' %}"
+                    <a href="{% url 'dashboard' %}"
                        class="btn btn-outline">
                         Cancel
                     </a>
 
                     <button type="submit"
-                            class="btn btn-primary">
-                        Create Draft Receipt
+                            class="btn btn-primary"
+                            onclick="return confirm('Apply this inventory adjustment?');">
+                        Apply Adjustment
                     </button>
 
                 </div>

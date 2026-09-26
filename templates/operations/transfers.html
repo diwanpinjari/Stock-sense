@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Deliveries — StockSense{% endblock %}
+{% block title %}Transfers — StockSense{% endblock %}
 
 {% block page_heading %}
-Delivery Orders
+Internal Transfers
 {% endblock %}
 
 
@@ -67,6 +67,22 @@ Delivery Orders
     .reference {
         color: #111827;
         font-weight: 800;
+    }
+
+    .route {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .route-location {
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .route-arrow {
+        color: #94a3b8;
     }
 
     .product-line {
@@ -140,7 +156,7 @@ Delivery Orders
         font-size: 12px;
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 850px) {
         .operation-header {
             align-items: flex-start;
             flex-direction: column;
@@ -160,16 +176,22 @@ Delivery Orders
 <div class="operation-header">
 
     <div class="operation-intro">
-        <h2>Outgoing Inventory</h2>
+
+        <h2>
+            Move Stock Internally
+        </h2>
 
         <p>
-            Manage delivery orders and deduct stock when outgoing operations
-            are validated.
+            Transfer products between internal warehouse locations while
+            maintaining the inventory ledger.
         </p>
+
     </div>
 
-    <a href="{% url 'delivery_create' %}" class="btn btn-primary">
-        + New Delivery
+
+    <a href="{% url 'transfer_create' %}"
+       class="btn btn-primary">
+        + New Transfer
     </a>
 
 </div>
@@ -182,44 +204,56 @@ Delivery Orders
         <table class="operation-table">
 
             <thead>
+
                 <tr>
                     <th>Reference</th>
-                    <th>Source</th>
-                    <th>Destination</th>
+                    <th>Route</th>
                     <th>Products</th>
                     <th>Status</th>
                     <th>Created</th>
                     <th>Action</th>
                 </tr>
+
             </thead>
 
 
             <tbody>
 
-                {% for delivery in deliveries %}
+                {% for transfer in transfers %}
 
                     <tr>
 
                         <td>
                             <span class="reference">
-                                {{ delivery.reference }}
+                                {{ transfer.reference }}
                             </span>
                         </td>
 
 
                         <td>
-                            {{ delivery.source_location|default:"—" }}
+
+                            <div class="route">
+
+                                <span class="route-location">
+                                    {{ transfer.source_location }}
+                                </span>
+
+                                <span class="route-arrow">
+                                    →
+                                </span>
+
+                                <span class="route-location">
+                                    {{ transfer.destination_location }}
+                                </span>
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            {{ delivery.destination_location|default:"Customer" }}
-                        </td>
 
-
-                        <td>
-
-                            {% for line in delivery.lines.all %}
+                            {% for line in transfer.lines.all %}
 
                                 <div class="product-line">
 
@@ -245,30 +279,30 @@ Delivery Orders
 
                         <td>
 
-                            <span class="status-badge status-{{ delivery.status }}">
-                                {{ delivery.get_status_display }}
+                            <span class="status-badge status-{{ transfer.status }}">
+                                {{ transfer.get_status_display }}
                             </span>
 
                         </td>
 
 
                         <td>
-                            {{ delivery.created_at|date:"M d, Y H:i" }}
+                            {{ transfer.created_at|date:"M d, Y H:i" }}
                         </td>
 
 
                         <td>
 
-                            {% if delivery.status != 'done' and delivery.status != 'canceled' %}
+                            {% if transfer.status != 'done' and transfer.status != 'canceled' %}
 
                                 <form method="post"
-                                      action="{% url 'delivery_validate' delivery.pk %}">
+                                      action="{% url 'transfer_validate' transfer.pk %}">
 
                                     {% csrf_token %}
 
                                     <button type="submit"
                                             class="btn btn-primary"
-                                            onclick="return confirm('Validate this delivery and deduct stock from inventory?');">
+                                            onclick="return confirm('Validate this transfer and move stock between locations?');">
                                         Validate
                                     </button>
 
@@ -290,21 +324,21 @@ Delivery Orders
 
                     <tr>
 
-                        <td colspan="7">
+                        <td colspan="6">
 
                             <div class="empty-state">
 
                                 <div class="empty-icon">
-                                    📤
+                                    🔄
                                 </div>
 
                                 <div class="empty-title">
-                                    No deliveries found
+                                    No transfers found
                                 </div>
 
                                 <div class="empty-text">
-                                    Create a delivery order when stock needs
-                                    to leave an internal location.
+                                    Create an internal transfer to move
+                                    inventory between locations.
                                 </div>
 
                             </div>

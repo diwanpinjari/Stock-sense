@@ -1,33 +1,311 @@
-{% extends 'base.html' %}
-{% block title %}Sign In - StockSense{% endblock %}
-{% block content %}
-<div style="max-width: 420px; margin: 40px auto;">
-    <div class="card" style="padding: 32px;">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <h2 style="color: var(--primary); font-size: 1.6rem;">StockSense</h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">Sign in to your account</p>
-        </div>
+{% extends "base.html" %}
 
-        <form method="POST" novalidate>
-            {% csrf_token %}
-            {% for field in form %}
-                <div style="margin-bottom: 18px;">
-                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">{{ field.label }}</label>
-                    {{ field }}
-                </div>
-            {% endfor %}
+{% block title %}Sign In — StockSense{% endblock %}
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Sign In</button>
-        </form>
-
-        <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem;">
-            <a href="{% url 'password_reset_request' %}" style="color: var(--primary); text-decoration: none;">Forgot password?</a>
-            <a href="{% url 'register' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Register Account</a>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
 <style>
-    .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
-    .form-input:focus { outline: none; border-color: var(--primary); }
+    .auth-page {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+    }
+
+    .auth-wrapper {
+        width: 100%;
+        max-width: 460px;
+    }
+
+    .auth-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        padding: 38px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .auth-logo {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 22px;
+        border-radius: 16px;
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .auth-header h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 28px;
+        letter-spacing: -0.7px;
+    }
+
+    .auth-header p {
+        margin: 9px 0 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group label {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid #dbe2ea;
+        border-radius: 11px;
+        outline: none;
+        background: #ffffff;
+        color: #111827;
+        font-size: 14px;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .form-group input::placeholder {
+        color: #94a3b8;
+    }
+
+    .form-group input:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-help {
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .auth-submit {
+        width: 100%;
+        min-height: 49px;
+        margin-top: 4px;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .auth-links {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 22px;
+        padding-top: 22px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .auth-links a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+
+    .auth-register {
+        margin-top: 22px;
+        text-align: center;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .auth-register a {
+        color: #4f46e5;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .auth-register a:hover {
+        text-decoration: underline;
+    }
+
+    .security-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-top: 25px;
+        padding: 12px 14px;
+        border-radius: 11px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .security-icon {
+        flex: 0 0 auto;
+        font-size: 14px;
+    }
+
+    @media (max-width: 520px) {
+        .auth-page {
+            padding: 30px 15px;
+        }
+
+        .auth-card {
+            padding: 28px 22px;
+            border-radius: 18px;
+        }
+
+        .auth-header h1 {
+            font-size: 25px;
+        }
+
+        .auth-links {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+    }
 </style>
+{% endblock %}
+
+
+{% block public_content %}
+<div class="auth-page">
+
+    <div class="auth-wrapper">
+
+        <div class="auth-card">
+
+            <div class="auth-logo">
+                S
+            </div>
+
+            <div class="auth-header">
+                <h1>Welcome back</h1>
+
+                <p>
+                    Sign in to your StockSense inventory management account.
+                </p>
+            </div>
+
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+
+                {% for field in form %}
+                    <div class="form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+
+                <button type="submit" class="btn btn-primary auth-submit">
+                    Sign In
+                </button>
+            </form>
+
+
+            <div class="auth-links">
+                <a href="{% url 'forgot_password' %}">
+                    Forgot password?
+                </a>
+
+                <a href="{% url 'index' %}">
+                    Back to home
+                </a>
+            </div>
+
+
+            <div class="auth-register">
+                Don't have an account?
+                <a href="{% url 'register' %}">
+                    Create one
+                </a>
+            </div>
+
+
+            <div class="security-note">
+                <span class="security-icon">🔒</span>
+
+                <span>
+                    Your account is protected by Django authentication and
+                    StockSense access controls.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}

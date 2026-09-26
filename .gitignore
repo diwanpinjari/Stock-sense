@@ -1,24 +1,38 @@
-# Virtual Environment
-venv/
-ENV/
-env/
-
-# Python Cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Local SQLite Database (CRITICAL: Do NOT commit)
-*.sqlite3
-db.sqlite3
+# Virtual environment
+venv/
+.venv/
+env/
 
-# Environment variables & secrets
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+# Environment variables
 .env
 .env.*
 
-# IDE config
+# Django static/media
+staticfiles/
+media/
+
+# IDE
 .vscode/
 .idea/
 
-# Static files
-staticfiles/
+# OS
+.DS_Store
+Thumbs.db
+
+# Python tooling
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local development
+*.sqlite3

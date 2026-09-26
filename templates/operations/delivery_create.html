@@ -1,52 +1,262 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}New Delivery Order - StockSense{% endblock %}
-{% block page_heading %}Create Delivery Order{% endblock %}
+{% block title %}New Delivery — StockSense{% endblock %}
+
+{% block page_heading %}
+Create Delivery Order
+{% endblock %}
+
 
 {% block content %}
-<div style="max-width: 680px; margin: 0 auto;">
-    <div class="card">
-        <form method="POST" novalidate>
-            {% csrf_token %}
-
-            {% for field in form %}
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
-                        {{ field.label }}
-                    </label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div style="color: #9b1c1c; font-size: 0.8rem; margin-top: 5px;">
-                            {{ field.errors.0 }}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <div style="display: flex; gap: 12px; margin-top: 28px;">
-                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
-                    Save Delivery Order
-                </button>
-                <a href="{% url 'deliveries_list' %}" class="btn" style="background: #f3f4f6; color: #374151;">
-                    Cancel
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
 
 <style>
-    .form-input {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-size: 0.95rem;
-        background-color: #fff;
+    .form-page {
+        max-width: 850px;
+        margin: 0 auto;
     }
-    .form-input:focus {
+
+    .form-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        padding: 24px 28px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .form-card-header h2 {
+        margin: 0;
+        color: #111827;
+        font-size: 20px;
+    }
+
+    .form-card-header p {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .form-body {
+        padding: 28px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border: 1px solid #dbe2ea;
+        border-radius: 10px;
         outline: none;
-        border-color: var(--primary);
+        background: #ffffff;
+        color: #111827;
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+        min-height: 47px;
+    }
+
+    .form-group textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-help {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 12px;
+    }
+
+    .non-field-errors {
+        margin-bottom: 20px;
+        padding: 13px 15px;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 13px;
+    }
+
+    .form-note {
+        padding: 13px 15px;
+        margin-bottom: 22px;
+        border-radius: 10px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .form-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    @media (max-width: 650px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full-width {
+            grid-column: auto;
+        }
+
+        .form-body,
+        .form-card-header {
+            padding: 22px;
+        }
+
+        .form-footer {
+            flex-direction: column-reverse;
+        }
+
+        .form-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
+
+
+<div class="form-page">
+
+    <div class="form-card">
+
+        <div class="form-card-header">
+
+            <h2>
+                New Delivery Order
+            </h2>
+
+            <p>
+                Create a draft operation for delivering inventory from an
+                internal location to a customer or external destination.
+            </p>
+
+        </div>
+
+
+        <div class="form-body">
+
+            <div class="form-note">
+                📤 Stock is deducted only when the delivery operation is
+                validated.
+            </div>
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+
+                <div class="form-grid">
+
+                    {% for field in form %}
+
+                        <div class="form-group
+                            {% if field.name == 'notes' %}
+                                full-width
+                            {% endif %}">
+
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <div class="field-help">
+                                    {{ field.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="field-error">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-footer">
+
+                    <a href="{% url 'deliveries_list' %}"
+                       class="btn btn-outline">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Create Draft Delivery
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
 {% endblock %}

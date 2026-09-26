@@ -1,65 +1,292 @@
-{% extends 'base.html' %}
-{% block title %}Register - StockSense{% endblock %}
-{% block content %}
-<div style="max-width: 440px; margin: 40px auto;">
-    <div class="card" style="padding: 32px;">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <h2 style="color: var(--primary); font-size: 1.6rem;">Create Account</h2>
-            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">Sign up for StockSense IMS</p>
-        </div>
+{% extends "base.html" %}
 
-        <form method="POST" novalidate class="register-form">
-            {% csrf_token %}
+{% block title %}Create Account — StockSense{% endblock %}
 
-            {% if form.non_field_errors %}
-                <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 16px;">
-                    {% for error in form.non_field_errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% for field in form %}
-                <div style="margin-bottom: 18px;">
-                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% if field.errors %}
-                        <div style="color: #991b1b; font-size: 0.8rem; margin-top: 4px;">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Register Account</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 20px; font-size: 0.85rem;">
-            Already have an account? <a href="{% url 'login' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign In</a>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
 <style>
-    /* Targets the actual rendered inputs directly, instead of relying on a class
-       that Django never attaches unless forms.py sets it. */
-    .register-form input[type="text"],
-    .register-form input[type="email"],
-    .register-form input[type="password"],
-    .register-form input[type="number"],
-    .register-form select,
-    .register-form textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 0.95rem;
+    .auth-page {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 45px 20px;
     }
-    .register-form input:focus,
-    .register-form select:focus,
-    .register-form textarea:focus {
+
+    .auth-wrapper {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .auth-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 22px;
+        padding: 38px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .auth-logo {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 22px;
+        border-radius: 16px;
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .auth-header h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 28px;
+        letter-spacing: -0.7px;
+    }
+
+    .auth-header p {
+        margin: 9px 0 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group label {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid #dbe2ea;
+        border-radius: 11px;
         outline: none;
-        border-color: var(--primary);
+        background: #ffffff;
+        color: #111827;
+        font-size: 14px;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .form-group input::placeholder {
+        color: #94a3b8;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-help {
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.55;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .non-field-errors {
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .register-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 4px;
+        padding: 13px 14px;
+        border-radius: 11px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: #1e40af;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .register-info-icon {
+        flex: 0 0 auto;
+    }
+
+    .auth-submit {
+        width: 100%;
+        min-height: 49px;
+        margin-top: 5px;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .auth-footer {
+        margin-top: 23px;
+        padding-top: 22px;
+        border-top: 1px solid #eef2f7;
+        text-align: center;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .auth-footer a {
+        color: #4f46e5;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .back-home {
+        display: block;
+        margin-top: 13px;
+        color: #94a3b8 !important;
+        font-size: 12px;
+        font-weight: 500 !important;
+    }
+
+    @media (max-width: 520px) {
+        .auth-page {
+            padding: 30px 15px;
+        }
+
+        .auth-card {
+            padding: 28px 22px;
+            border-radius: 18px;
+        }
+
+        .auth-header h1 {
+            font-size: 25px;
+        }
     }
 </style>
+{% endblock %}
+
+
+{% block public_content %}
+<div class="auth-page">
+
+    <div class="auth-wrapper">
+
+        <div class="auth-card">
+
+            <div class="auth-logo">
+                S
+            </div>
+
+
+            <div class="auth-header">
+                <h1>Create your account</h1>
+
+                <p>
+                    Register for StockSense and start managing your inventory.
+                </p>
+            </div>
+
+
+            <div class="register-info">
+                <span class="register-info-icon">ℹ️</span>
+
+                <span>
+                    After registration, you may need to verify your account
+                    using the verification code provided by the system.
+                </span>
+            </div>
+
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+
+                {% for field in form %}
+                    <div class="form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="field-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+
+                <button type="submit" class="btn btn-primary auth-submit">
+                    Create Account
+                </button>
+            </form>
+
+
+            <div class="auth-footer">
+
+                Already have an account?
+                <a href="{% url 'login' %}">
+                    Sign in
+                </a>
+
+                <a href="{% url 'index' %}" class="back-home">
+                    ← Back to home
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}
